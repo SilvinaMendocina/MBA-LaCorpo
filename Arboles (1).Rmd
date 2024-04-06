@@ -1,0 +1,111 @@
+---
+title: "Entrenamient de Árboles"
+author: "Ricardo R. Palma"
+date: "24/3/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(car)
+library(readr)
+partners <- read_csv("BSC_proveedores.csv", 
+    col_types = cols(Empresa = col_factor(levels = c("Imitadora", 
+        "Proactiva", "Innovadora"))))
+# partners <- read.table("BSC_proveedores.csv",header=TRUE,sep=",")
+summary(partners)
+```
+
+
+
+
+
+
+Matriz de Covarianza
+
+```{r}
+library(scatterPlotMatrix)
+scatterPlotMatrix(partners)
+```
+Como vemos la columna 1, PK, (primary key) no es parte de los datos. Se trata de un número secuencial que no está relacionado con la muestra.
+
+
+## Entrenamiento de árbol de decisión
+
+
+
+
+Esta técnica utiliza un set de datos representativos de una situaci\'on y utilizando recursivamente el teoréma de Bayes puede armar un pronosticador o clasificador de datos. Es una t\'ecnica parecida a la de clustering, pero m\'as refinada, pues no se basa en reglas sino en parendizaje del set de datos usado como entrenamento. En el paquete party existen dos funciones ctree  que se utiliza para entrenar y predict que se usa para pronosticar o generar la regla de decici\'on que debemos usar. 
+
+
+```{r}
+library(party)
+attach(partners)
+str(partners)    
+# describe al objeto transit y muestras las columna que tiene
+
+ind <- sample(2, nrow(partners), replace=TRUE, prob=c(0.7, 0.3))  
+# toma una muestra  
+ind  
+# nos imprime la muestra tomada.
+```
+
+
+```{r}
+trainData <- partners [ind==1,]    
+# genero un set de entrenamiento 
+testData <- partners [ind==2,]    
+# genero un set de datos de prueba
+myFormula <- Empresa ~ Rec_Humano + Tecnologia + Capital + Equipo 
+transit_ctree <- ctree(myFormula, data=trainData)    
+# creo el motor de entrenamiento
+# Verificar las prediciones 
+table(predict(transit_ctree), trainData$Empresa) 
+print(transit_ctree) 
+```
+
+
+
+
+
+```{r}
+library(party)
+attach(partners)
+str(partners)    
+# describe al objeto transit
+ind <- sample(2, nrow(partners), replace=TRUE, prob=c(0.7, 0.3))  
+# toma una muestra 
+ind  
+# nos imprime la muestra tomada.
+```
+
+
+
+
+
+
+```{r}
+table(predict(transit_ctree), trainData$Empresa) 
+```
+
+
+Impresión del Árbol de Decisión
+
+```{r}
+plot(transit_ctree, las=2)
+```
+
+```{r}
+summary(trainData$Empresa)
+```
+
+
+
+
+ 
+
+
